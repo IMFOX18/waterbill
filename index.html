@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý thu tiền nước</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background-color: #f2f2f2; }
+    button { padding: 5px 10px; margin: 2px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Danh sách hóa đơn tiền nước</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Hộ</th>
+        <th>Số tiền</th>
+        <th>Trạng thái</th>
+        <th>Hành động</th>
+      </tr>
+    </thead>
+    <tbody id="bill-table"></tbody>
+  </table>
+
+  <script>
+    // 🚨 sau khi deploy backend trên Render, thay URL này thành link thật
+    const API = "https://water-bill-backend.onrender.com";
+
+    async function loadBills() {
+      const res = await fetch(API + "/bills");
+      const bills = await res.json();
+      const tbody = document.getElementById("bill-table");
+      tbody.innerHTML = "";
+      bills.forEach(b => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${b.name}</td>
+          <td>${b.amount}₫</td>
+          <td>${b.status}</td>
+          <td>
+            ${b.status === "unpaid" ? `<button onclick="pay(${b.id})">Tôi đã chuyển</button>` : ""}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function pay(id) {
+      await fetch(API + "/pay/" + id, { method: "POST" });
+      alert("Đã báo chuyển khoản!");
+      loadBills();
+    }
+
+    loadBills();
+  </script>
+</body>
+</html>
